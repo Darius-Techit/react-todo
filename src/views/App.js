@@ -11,7 +11,6 @@ const App = () => {
         <img src={logo} className="App-logo" alt="logo" />
         <h3>Todo App</h3>
         <ListTodo />
-
       </header>
     </div>
   );

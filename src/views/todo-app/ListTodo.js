@@ -1,40 +1,66 @@
-import React from "react";
-import './ListTodo.scss';
+import React, { useEffect, useState } from "react";
+import '../../scss/ListTodo.scss';
+import AddTodo from "./AddTodo";
+import SearchList from "./SearchList";
 
-class ListTodo extends React.Component {
-    state = {
-        listTodoS: [
-            { id: 'todo1', title: 'Doing Homework' },
-            { id: 'todo2', title: 'Making Video' },
-            { id: 'todo3', title: 'Fixing bugs' },
-        ]
+const defaultTodos = [
+    { id: 'todo1', input: 'Doing Homework' },
+    { id: 'todo2', input: 'Making Video' },
+    { id: 'todo3', input: 'Fixing bugs' },
+]
+const ListTodo = () => {
+    const [searchList, setSearchList] = useState('');
+    const [listTodoS, setListTodoS] = useState([]);
+
+    useEffect(() => {
+        const storeTodos = localStorage.getItem('todos');
+        if (storeTodos) {
+            setListTodoS(JSON.parse(storeTodos));
+        } else {
+            setListTodoS(defaultTodos);
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('todos', JSON.stringify(listTodoS));
+    }, [listTodoS]);
+
+    const handleDeleteTodo = (id) => {
+        const confirmDelete = window.confirm('Bạn có muốn xóa không?');
+        if (confirmDelete) {
+            setListTodoS(currentTodos => {
+                return currentTodos.filter(todo => todo.id !== id);
+            })
+
+        }
+
+        // return confirmDelete;
     }
-    render() {
-        let { listTodoS } = this.state;
-        // let ListTodoS = this.state.ListTodoS;
-        return (
-            <div className="list-todo-container">
-                <div className="add-todo">
-                    <input type="text" placeholder="Add a new todo" />
-                    <button className="add" type="button">Add</button>
-                </div>
-                <div className="list-todo-content">
-                    {listTodoS && listTodoS.length > 0 &&
-                        listTodoS.map((item, index) => {
+    return (
+        <div className="list-todo-container">
+            <SearchList onSearch={setSearchList} />
+            <AddTodo
+                listTodoS={listTodoS}
+                setListTodoS={setListTodoS}
+            // addNewTodo={(todo) => setListTodoS([...listTodoS, todo])}
+            />
+            <div className="list-todo-content">
+                {listTodoS && listTodoS.length > 0 &&
+                    listTodoS.filter(todo => todo.input.toLowerCase().includes(searchList.toLowerCase()))
+                        .map((row, index) => {
                             return (
-                                <div className="todo-child" key={item.id}>
-                                    <span> {index + 1}- {item.title} </span>
+                                <div className="todo-child" key={row.id}>
+                                    <span> {index + 1}- {row.input} </span>
                                     <button className="edit">Edit</button>
-                                    <button className="delete">Delete</button>
+                                    <button className="delete" onClick={() => handleDeleteTodo(row.id)}>Delete</button>
                                 </div>
                             )
                         })
-                    }
-
-                </div>
+                }
 
             </div>
-        )
-    }
+
+        </div>
+    )
 }
 export default ListTodo;
