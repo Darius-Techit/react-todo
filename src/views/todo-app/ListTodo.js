@@ -11,7 +11,8 @@ const defaultTodos = [
 const ListTodo = () => {
     const [searchList, setSearchList] = useState('');
     const [listTodoS, setListTodoS] = useState([]);
-
+    const [editTodoId, setEditTodoId] = useState(null);
+    const [editInput, setEditInput] = useState('');
     useEffect(() => {
         const storeTodos = localStorage.getItem('todos');
         if (storeTodos) {
@@ -33,8 +34,22 @@ const ListTodo = () => {
             })
 
         }
-
-        // return confirmDelete;
+    }
+    const handleEditTodo = (row) => {
+        setEditTodoId(row.id);
+        setEditInput(row.input);
+    };
+    const handleCancleEditTodo = () => {
+        setEditTodoId(null);
+        setEditInput('');
+    }
+    const handleSaveTodo = () => {
+        const updateTodos = listTodoS.map(todo =>
+            todo.id === editTodoId ? { ...todo, input: editInput } : todo
+        );
+        setListTodoS(updateTodos);
+        setEditTodoId(null);
+        setEditInput('');
     }
     return (
         <div className="list-todo-container">
@@ -50,9 +65,23 @@ const ListTodo = () => {
                         .map((row, index) => {
                             return (
                                 <div className="todo-child" key={row.id}>
-                                    <span> {index + 1}- {row.input} </span>
-                                    <button className="edit">Edit</button>
-                                    <button className="delete" onClick={() => handleDeleteTodo(row.id)}>Delete</button>
+                                    {editTodoId === row.id ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={editInput}
+                                                onChange={(e) => setEditInput(e.target.value)}
+                                            />
+                                            <button className="save" onClick={handleSaveTodo} >Save</button>
+                                            <button className="cancel" onClick={handleCancleEditTodo}>Cancel</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>{index + 1} - {row.input}</span>
+                                            <button className="edit" onClick={() => handleEditTodo(row)}>Edit</button>
+                                            <button className="delete" onClick={() => handleDeleteTodo(row.id)}>Delete</button>
+                                        </>
+                                    )}
                                 </div>
                             )
                         })
